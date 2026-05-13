@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vintage Source KC • SKU Inventory (New Descriptions)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Playfair+Display:wght@700&amp;display=swap');
+        
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        .heading-serif { font-family: 'Playfair Display', Georgia, serif; }
+
+        .product-card {
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .modal { animation: modalPopIn 0.2s ease-out forwards; }
+        @keyframes modalPopIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .category-badge {
+            font-size: 0.7rem;
+            padding: 0.1rem 0.6rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            letter-spacing: -.02em;
+        }
+
+        .sku-pill {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.75rem;
+            padding: 0.1rem 0.55rem;
+            background-color: #f4f4f5;
+            color: #3f2a1e;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-zinc-50 text-zinc-800">
+    <!-- Header -->
+    <header class="bg-white border-b border-zinc-200 sticky top-0 z-50">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-x-3">
+                    <div class="w-9 h-9 bg-[#3f2a1e] rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid fa-chair text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-semibold text-2xl tracking-tighter">Vintage Source</span>
+                        <span class="font-medium text-zinc-500 text-xl">KC</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-x-3">
+                    <div class="hidden sm:flex items-center gap-x-2 bg-emerald-100 text-emerald-700 rounded-3xl px-3 py-1 text-xs font-semibold">
+                        <i class="fa-solid fa-check-double mr-1"></i>
+                        <span>SKU Items • New Descriptions</span>
+                    </div>
+                    <button onclick="window.print()" 
+                            class="flex items-center gap-x-2 px-4 py-2 text-sm font-medium rounded-3xl border border-zinc-300 hover:bg-zinc-100 transition-colors">
+                        <i class="fa-solid fa-print mr-1.5"></i>
+                        <span class="hidden sm:inline">Print / PDF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 pt-8 pb-6">
+        <div class="max-w-2xl">
+            <div class="inline-flex items-center gap-x-2 bg-white border border-zinc-200 rounded-3xl px-4 py-1 text-sm mb-3">
+                <span class="font-semibold text-[#3f2a1e]">Internal Preview</span>
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-semibold tracking-tighter heading-serif">SKU Inventory</h1>
+            <p class="mt-3 text-xl text-zinc-600">Newly compiled descriptions, details &amp; Etsy keywords for items with SKUs</p>
+            <p class="mt-2 text-sm text-zinc-500">These are the pieces your team hasn’t reviewed yet. Clean, ready-to-use copy for Shopify &amp; Etsy.</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 pb-6 sticky top-16 z-40 bg-zinc-50 pt-2">
+        <div class="bg-white border border-zinc-200 rounded-3xl p-2 shadow-sm">
+            <div class="flex flex-col lg:flex-row gap-3">
+                
+                <!-- Search -->
+                <div class="flex-1 relative">
+                    <i class="fa-solid fa-search absolute left-4 top-3.5 text-zinc-400"></i>
+                    <input type="text" id="searchInput" 
+                           class="w-full pl-11 pr-4 py-3 bg-white border border-zinc-200 focus:border-[#3f2a1e] rounded-3xl text-sm placeholder:text-zinc-400 focus:outline-none"
+                           placeholder="Search by SKU, title, designer, or description...">
+                </div>
+
+                <!-- Category Filters -->
+                <div class="flex flex-wrap gap-1.5" id="categoryFilters">
+                    <button onclick="filterByCategory('all')" class="category-btn active px-5 py-2 text-sm font-medium rounded-3xl bg-[#3f2a1e] text-white" data-category="all">All</button>
+                    <button onclick="filterByCategory('dining')" class="category-btn px-4 py-2 text-sm font-medium rounded-3xl border border-zinc-200 hover:bg-zinc-50" data-category="dining">Dining</button>
+                    <button onclick="filterByCategory('seating')" class="category-btn px-4 py-2 text-sm font-medium rounded-3xl border border-zinc-200 hover:bg-zinc-50" data-category="seating">Seating</button>
+                    <button onclick="filterByCategory('audio')" class="category-btn px-4 py-2 text-sm font-medium rounded-3xl border border-zinc-200 hover:bg-zinc-50" data-category="audio">Audio</button>
+                    <button onclick="filterByCategory('tables')" class="category-btn px-4 py-2 text-sm font-medium rounded-3xl border border-zinc-200 hover:bg-zinc-50" data-category="tables">Tables</button>
+                    <button onclick="filterByCategory('storage')" class="category-btn px-4 py-2 text-sm font-medium rounded-3xl border border-zinc-200 hover:bg-zinc-50" data-category="storage">Storage</button>
+                    <button onclick="filterByCategory('other')" class="category-btn px-4 py-2 text-sm font-medium rounded-3xl border border-zinc-200 hover:bg-zinc-50" data-category="other">Other</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex items-center justify-between mt-3 px-1 text-xs">
+            <div class="text-zinc-500" id="resultsCount">Showing all SKU items</div>
+            <div class="text-emerald-600 text-xs font-medium">Mobile friendly • Tap card for full details + keywords</div>
+        </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 pb-12">
+        <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+        
+        <div id="noResults" class="hidden text-center py-12">
+            <i class="fa-solid fa-search text-4xl text-zinc-300 mb-3"></i>
+            <p class="text-lg font-medium">No matching items</p>
+            <p class="text-sm text-zinc-500 mt-1">Try a different search or filter</p>
+        </div>
+    </div>
+
+    <footer class="border-t border-zinc-200 bg-white">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-8 text-sm text-zinc-600">
+            <div class="flex flex-col md:flex-row md:items-center gap-y-2 justify-between">
+                <div>
+                    <strong>Vintage Source KC</strong> — Kansas City, Missouri<br>
+                    <span class="text-xs">Internal preview • SKU items with compiled descriptions</span>
+                </div>
+                <div class="text-xs max-w-md">
+                    All descriptions, shipping notes, and Etsy keywords have been freshly compiled for these SKU’d items.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" onclick="if (event.target.id === 'detailModal') closeModal()" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div onclick="event.stopImmediatePropagation()" class="modal bg-white w-full max-w-3xl max-h-[92vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+            
+            <div class="px-6 pt-6 pb-4 border-b flex items-start justify-between sticky top-0 bg-white z-10">
+                <div class="flex-1 pr-4">
+                    <div class="flex items-center gap-x-2 mb-1">
+                        <span id="modalSKU" class="sku-pill font-mono"></span>
+                        <span id="modalCategory" class="category-badge"></span>
+                    </div>
+                    <h2 id="modalTitle" class="text-2xl font-semibold tracking-tight"></h2>
+                    <p id="modalPrice" class="text-3xl font-semibold text-[#3f2a1e] mt-1"></p>
+                </div>
+                <button onclick="closeModal()" class="text-zinc-400 hover:text-zinc-600 p-2 -mr-2 mt-1">
+                    <i class="fa-solid fa-times text-2xl"></i>
+                </button>
+            </div>
+            
+            <div class="overflow-y-auto flex-1 p-6 space-y-6 text-[15px]">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-xs uppercase tracking-widest text-zinc-500 font-medium mb-px">Dimensions</div>
+                        <div id="modalDimensions" class="font-medium"></div>
+                    </div>
+                    <div>
+                        <div class="text-xs uppercase tracking-widest text-zinc-500 font-medium mb-px">Location</div>
+                        <div class="font-medium">Kansas City, Missouri <span class="text-emerald-600 text-xs">(Local pickup available)</span></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="uppercase text-xs tracking-[1.5px] font-semibold text-zinc-500 mb-2">Overview</div>
+                    <div id="modalOverview" class="prose prose-sm text-zinc-700 leading-relaxed"></div>
+                </div>
+
+                <div>
+                    <div class="uppercase text-xs tracking-[1.5px] font-semibold text-zinc-500 mb-2">Full Description &amp; Details</div>
+                    <div id="modalDescription" class="prose prose-sm text-zinc-700 leading-relaxed whitespace-pre-line text-[14.5px]"></div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                    <div class="flex gap-x-3">
+                        <i class="fa-solid fa-truck text-amber-600 mt-0.5"></i>
+                        <div class="flex-1">
+                            <div class="font-semibold text-amber-800 text-sm">Important Shipping Note</div>
+                            <div class="text-amber-700 text-sm mt-1 leading-snug">
+                                Shipping is not included in the Etsy checkout price. Please message Vintage Source with your ZIP code before purchasing so we can confirm freight cost, delivery timing, and restoration schedule.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="uppercase text-xs tracking-[1.5px] font-semibold text-zinc-500 mb-2">Etsy Keywords / Tags</div>
+                    <div id="modalKeywords" class="flex flex-wrap gap-1.5"></div>
+                </div>
+            </div>
+            
+            <div class="border-t p-4 bg-zinc-50 flex items-center justify-between text-sm">
+                <div class="text-zinc-500 text-xs">Data from Master Inventory • May 2026</div>
+                <button onclick="closeModal()" class="px-6 py-2.5 rounded-3xl bg-zinc-900 hover:bg-black text-white text-sm font-medium">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            // Dining Sets & Chairs
+            { id: 1, sku: "521100526", category: "dining", title: "Bissman Dining Table with 2 Leaves and 4 Chairs", price: "$5,499", dimensions: "84\" L x 42\" W x 30\" H", shortDesc: "Solid mid-century dining set with two extension leaves and four matching chairs. Clean lines and good proportions.", fullDesc: "This Bissman dining table set includes the table with two extension leaves and four matching chairs. A solid mid-century piece with clean lines and good proportions, perfect for both everyday use and entertaining.\n\nTable extends comfortably with the included leaves. Chairs are sturdy with classic mid-century proportions. A practical and stylish vintage dining set ready for your home.", keywords: "bissman dining table, mid century dining, dining table set, mcm dining, vintage dining table, dining room furniture, wood dining table, extendable dining table" },
+            
+            { id: 2, sku: "424000944", category: "dining", title: "Bissman Dining Table with 6 Chairs and 1 Leaf", price: "$6,499", dimensions: "71\" L x 42\" W x 30\" H", shortDesc: "Bissman dining table with six chairs and one extension leaf. Clean, functional mid-century aesthetic.", fullDesc: "Bissman dining table accompanied by six chairs and one extension leaf. Features the clean, functional aesthetic typical of quality mid-century dining furniture.\n\nWell-proportioned table with a single leaf for flexibility. The six chairs offer comfortable seating with classic mid-century styling. A complete, ready-to-use vintage dining set.", keywords: "bissman dining table, dining table set, mid century dining, mcm dining set, vintage dining, dining chairs, extendable table" },
+            
+            { id: 3, sku: "4250000051", category: "dining", title: "American of Martinsville Dining Set with 6 Chairs and 3 Leaves", price: "$4,699", dimensions: "98\" L x 39.5\" W x 30\" H", shortDesc: "Substantial mid-century dining suite with three extension leaves and six chairs. Known for solid construction.", fullDesc: "American of Martinsville dining set consisting of a large table with three extension leaves and six chairs. A substantial mid-century dining suite known for solid construction and timeless design.\n\nThis generous table can seat a large group when fully extended. The three leaves provide excellent flexibility. Chairs are well-built with comfortable proportions.", keywords: "american of martinsville, dining set, mid century dining, mcm dining set, vintage dining table, dining chairs, extendable dining" },
+            
+            { id: 4, sku: "1025", category: "dining", title: "Edward Wormley for Dunbar Dining Table with 6 Chairs", price: "$4,999", dimensions: "100\" L x 40\" W x 29.5\" H", shortDesc: "Designer-quality Edward Wormley for Dunbar dining set. Refined forms and exceptional craftsmanship.", fullDesc: "Edward Wormley for Dunbar dining table with six chairs. Wormley was one of the most influential American designers of the mid-century period, known for refined forms and exceptional craftsmanship.\n\nBeautifully proportioned table with elegant lines. The six chairs complement the table with matching mid-century refinement. A designer-quality vintage dining set with strong presence.", keywords: "edward wormley, dunbar dining table, mid century dining, mcm dining, vintage dining set, designer dining table" },
+            
+            { id: 5, sku: "320100575", category: "dining", title: "Kent Coffee Perspecta Dining Table with 8 Chairs", price: "$6,999", dimensions: "78\" L x 42\" W x 29.5\" H", shortDesc: "Substantial mid-century dining set for larger gatherings. Bold yet refined Perspecta series aesthetic.", fullDesc: "Kent Coffee Perspecta dining table with eight chairs. A substantial mid-century set designed for larger gatherings, featuring clean modern lines and generous proportions.\n\nLarge table comfortably seats eight. The Perspecta series is known for its bold yet refined mid-century aesthetic. A complete, impressive vintage dining suite.", keywords: "kent coffee, perspecta dining table, mid century dining, mcm dining set, vintage dining, large dining set" },
+            
+            { id: 6, sku: "6230000001", category: "dining", title: "Kipp Stewart for Drexel Declaration Dining Table with 6 Chairs and 2 Leaves", price: "$4,999", dimensions: "88\" L x 45\" W x 29.5\" H", shortDesc: "Iconic Kipp Stewart for Drexel Declaration dining set. Warm walnut and sculptural forms — a true mid-century classic.", fullDesc: "Kipp Stewart for Drexel \"Declaration\" dining table with six chairs and two leaves. Part of Drexel’s celebrated Declaration line, designed by Kipp Stewart in the late 1950s — a true icon of American mid-century modern design.\n\nThe Declaration collection is highly regarded for its warm walnut, sculptural forms, and thoughtful details.", keywords: "kipp stewart, drexel declaration, dining table, mid century dining, mcm dining set, vintage dining, designer dining table" },
+            
+            { id: 7, sku: "4201000511", category: "dining", title: "United Dining Table with 6 Chairs and 1 Leaf", price: "$3,999", dimensions: "72\" L x 40\" W x 30\" H", shortDesc: "Clean, well-made mid-century dining set with simple functional design and one extension leaf.", fullDesc: "United dining table with six chairs and one extension leaf. A clean, well-made mid-century set with simple, functional design.\n\nPractical table that extends with the included leaf. The six chairs are sturdy and comfortable. A straightforward, honest vintage dining set.", keywords: "united dining table, mid century dining, mcm dining set, vintage dining, dining table with chairs, wood dining table" },
+            
+            { id: 8, sku: "420100051", category: "dining", title: "6 MCM Chairs with Cane Backs", price: "$999", dimensions: "18\" W x 19\" D x 38.5\" H each", shortDesc: "Set of six mid-century modern dining chairs featuring cane backs. Lightweight yet strong construction.", fullDesc: "Set of six mid-century modern dining chairs featuring cane backs. Classic lightweight yet strong construction typical of the period.\n\nThe cane backs add visual lightness and texture. These chairs work beautifully with many mid-century tables or as standalone accent seating.", keywords: "mcm dining chairs, cane back chairs, mid century chairs, vintage dining chairs, wood dining chairs, cane dining chairs" },
+            
+            { id: 9, sku: "426000001", category: "dining", title: "Danish Modern Set of 5 Teak Chairs", price: "$649", dimensions: "18.5\" W x 19\" D x 37.5\" H each", shortDesc: "Set of five Danish modern teak dining chairs. Warm teak with clean, ergonomic Scandinavian lines.", fullDesc: "Set of five Danish modern teak dining chairs. Classic Scandinavian design with warm teak wood and clean, ergonomic lines.\n\nTeak has aged beautifully on these chairs. The proportions are comfortable for extended seating. A wonderful example of Danish modern craftsmanship.", keywords: "danish modern chairs, teak dining chairs, mid century chairs, vintage teak chairs, danish modern furniture" },
+            
+            { id: 10, sku: "624000004", category: "dining", title: "Granada Wrought Iron Dining Set", price: "$999", dimensions: "39\" L x 39\" W x 29.5\" H", shortDesc: "Compact square wrought iron dining set. Sturdy with nice vintage patina — great for smaller spaces or breakfast nooks.", fullDesc: "Granada wrought iron dining set. Features a compact square table with matching chairs in a durable, stylish wrought iron construction.\n\nGreat for smaller spaces or as a breakfast nook set. The wrought iron is sturdy and has a nice vintage patina.", keywords: "wrought iron dining set, granada dining, vintage dining set, iron dining table, outdoor dining, vintage patio furniture" },
+
+            // Audio Consoles with SKUs
+            { id: 11, sku: "327000003", category: "audio", title: "Motorola Bench Console", price: "$6,999", dimensions: "66.5\" W x 18\" D x 21.5\" H", shortDesc: "Vintage Motorola bench-style stereo console. Sleek horizontal form typical of mid-century audio furniture.", fullDesc: "Vintage Motorola bench-style stereo console from the mid-century era. Features a long, low profile typical of the period’s audio furniture.\n\nThis bench console has a sleek, horizontal form that works well under windows or along walls. A classic piece of vintage audio furniture with strong mid-century character.", keywords: "motorola console, vintage stereo console, mid century console, mcm audio furniture, retro engineered console, wood console" },
+            
+            { id: 12, sku: "328000055", category: "audio", title: "Motorola Console by Drexel", price: "$9,499", dimensions: "51\" W x 44\" D x 17\" H", shortDesc: "Higher-end Motorola stereo console produced in collaboration with Drexel. Substantial furniture-grade presence.", fullDesc: "Motorola stereo console produced in collaboration with Drexel. Combines Motorola’s audio engineering with Drexel’s furniture craftsmanship.\n\nHigher-end construction with Drexel cabinetry. The console has a more substantial, furniture-grade presence than standard Motorola pieces.", keywords: "motorola console, drexel console, vintage stereo console, mid century console, mcm audio furniture, retro engineered" },
+            
+            { id: 13, sku: "111111111", category: "audio", title: "Relikcs Timbre 72” Walnut Console", price: "$9,999", dimensions: "72\" W x 21\" D x 31\" H", shortDesc: "Modern interpretation of classic mid-century audio furniture in solid walnut. Excellent proportions and warm wood tones.", fullDesc: "Relikcs Timbre 72\" solid walnut console. A modern interpretation of classic mid-century audio furniture, built with beautiful hardwood and clean lines.\n\nCrafted from solid walnut with excellent proportions. Designed to house audio equipment while functioning as beautiful furniture. A high-quality console with warm wood tones.", keywords: "relikcs timbre, walnut console, audio console, mid century console, mcm audio furniture, vinyl storage console" },
+            
+            { id: 14, sku: "524000056", category: "audio", title: "Grundig M560A Console", price: "$8,499", dimensions: "45\" W x 15.5\" D x 32\" H", shortDesc: "German-made Grundig M560A vintage stereo console. Solid engineering and distinctive European styling.", fullDesc: "Grundig M560A vintage stereo console. German-made audio furniture from the mid-century period, known for solid engineering and distinctive design.\n\nGrundig consoles are appreciated for their build quality and unique European styling. This M560A model has a compact yet substantial presence.", keywords: "grundig console, vintage stereo console, mid century audio, retro console, german console, wood console cabinet" },
+            
+            { id: 15, sku: "429000051", category: "audio", title: "Zenith Y960T Console", price: "$8,999", dimensions: "65\" W x 20.5\" D x 29\" H", shortDesc: "Classic Zenith mid-century audio furniture. Reliable construction and pleasing aesthetics.", fullDesc: "Zenith Y960T vintage stereo console. Part of Zenith’s well-regarded line of mid-century audio furniture.\n\nClassic Zenith styling with good proportions. These consoles are known for reliable construction and pleasing mid-century aesthetics.", keywords: "zenith console, vintage stereo console, mid century console, retro engineered console, wood console, vintage audio" },
+            
+            { id: 16, sku: "22222221", category: "audio", title: "Normande Sterling German Console", price: "$9,999", dimensions: "41.5\" W x 20.5\" D x 29.5\" H", shortDesc: "German-made Normande Sterling vintage stereo console. Refined European design with solid construction.", fullDesc: "Normande Sterling German-made vintage stereo console. Features European design sensibilities and solid construction.\n\nDistinctive German engineering and styling. The console has a refined, slightly more formal presence than many American mid-century pieces.", keywords: "normande sterling, german console, vintage stereo console, mid century audio, retro console, wood console" },
+            
+            { id: 17, sku: "22222222", category: "audio", title: "Grundig Petite Console", price: "$7,999", dimensions: "31.5\" W x 15\" D x 30.5\" H", shortDesc: "More compact version of Grundig’s popular stereo consoles. Ideal for smaller spaces while retaining quality and style.", fullDesc: "Grundig Petite console — a more compact version of Grundig’s popular stereo consoles. Ideal for smaller spaces while retaining the brand’s quality and style.\n\nSmaller footprint makes this easier to place than full-size consoles. Still offers the distinctive Grundig look and solid build.", keywords: "grundig console, petite console, vintage stereo console, mid century audio, small console, wood console cabinet" },
+            
+            { id: 18, sku: "22222223", category: "audio", title: "Telefunken Salzburg Console", price: "$9,499", dimensions: "49\" W x 15\" D x 34.5\" H", shortDesc: "Elegant German Telefunken Salzburg console. Sophisticated proportions and solid construction.", fullDesc: "Telefunken Salzburg vintage stereo console. German-made with the refined engineering and design Telefunken was known for.\n\nTelefunken audio equipment from this era is highly regarded. The Salzburg model has elegant proportions and solid construction.", keywords: "telefunken console, vintage stereo console, mid century audio, german console, retro console, wood console" },
+            
+            { id: 19, sku: "32010004", category: "audio", title: "Motorola Stereophonic Console", price: "$8,499", dimensions: "48\" W x 17\" D x 30.5\" H", shortDesc: "Classic mid-century Motorola styling with good presence. Functional audio piece and attractive furniture.", fullDesc: "Motorola Stereophonic vintage console. Features the classic mid-century design language Motorola popularized in their audio furniture.\n\nRecognizable Motorola styling with good presence. These consoles were built to be both functional audio pieces and attractive furniture.", keywords: "motorola console, stereophonic console, vintage stereo console, mid century audio, retro console, wood console" },
+            
+            { id: 20, sku: "5201000572", category: "audio", title: "Electrohome Circa 75 by Deilcraft Model 701C", price: "$14,399", dimensions: "62\" W x 24\" D x 26\" H", shortDesc: "Canadian-made Electrohome 701C with distinctive design and solid construction. Highly regarded model.", fullDesc: "Electrohome Circa 75 Model 701C stereo console by Deilcraft. Canadian-made with a distinctive design and solid construction.\n\nThe 701C is a well-regarded model with excellent proportions and build quality. Deilcraft’s cabinetry paired with Electrohome’s audio components makes for a desirable vintage piece.", keywords: "electrohome 701c, deilcraft console, vintage stereo console, mid century audio, retro engineered console, walnut console" },
+
+            // Storage & Credenzas
+            { id: 21, sku: "521100055", category: "storage", title: "Jack Cartwright for Founders Slate Top Credenza", price: "$1,999", dimensions: "48\" W x 16\" D x 25\" H", shortDesc: "Jack Cartwright for Founders credenza with handsome slate top. Clean architectural lines and thoughtful proportions.", fullDesc: "Jack Cartwright for Founders credenza with slate top. Features the clean, architectural lines Cartwright was known for, paired with a handsome slate surface.\n\nThe slate top adds texture and durability. Cartwright’s designs are appreciated for their thoughtful proportions and modern sensibility.", keywords: "jack cartwright, founders credenza, slate top credenza, mid century credenza, vintage credenza, wood credenza" },
+            
+            { id: 22, sku: "32210003221", category: "storage", title: "Paul McCobb Planner Group Credenza + Hutch", price: "$3,999", dimensions: "60\" W x 18\" D x 50.5\" H", shortDesc: "Iconic Paul McCobb Planner Group credenza with hutch. Modular, functional design and beautiful proportions.", fullDesc: "Paul McCobb Planner Group credenza with hutch. McCobb was one of the most important American mid-century designers, and the Planner Group is among his most iconic and versatile collections.\n\nThe Planner Group is celebrated for its modular, functional design and beautiful proportions. This credenza + hutch combination offers excellent storage and display.", keywords: "paul mccobb, planner group, credenza with hutch, mid century credenza, vintage credenza, wood credenza" },
+            
+            { id: 23, sku: "624000008", category: "storage", title: "Danish Modern Credenza and Bookshelf", price: "$2,199", dimensions: "47\" W x 20.5\" D x 73\" H", shortDesc: "Danish modern credenza with integrated bookshelf. Warm wood tones and clean Scandinavian functionality.", fullDesc: "Danish modern credenza with integrated bookshelf. Features warm wood tones and the clean, functional aesthetic characteristic of Scandinavian mid-century design.\n\nThe combination of lower cabinet storage and upper shelving makes this a very practical piece. Beautiful wood grain and simple, elegant lines.", keywords: "danish modern credenza, teak credenza, mid century credenza, vintage credenza, wood credenza with bookshelf" },
+            
+            { id: 24, sku: "3221000575", category: "storage", title: "Paul McCobb Planner Group Petite Credenza", price: "$1,999", dimensions: "36\" L x 18\" D x 33.5\" H", shortDesc: "Smaller-scale version of McCobb’s iconic modular Planner Group system. Excellent for tighter spaces.", fullDesc: "Paul McCobb Planner Group petite credenza. A smaller-scale version of McCobb’s iconic modular system — ideal for tighter spaces or as a complementary piece.\n\nRetains all the thoughtful design and quality of the full Planner Group line in a more compact form. Excellent proportions and versatile storage.", keywords: "paul mccobb, planner group, petite credenza, mid century credenza, vintage credenza, wood credenza, small credenza" },
+            
+            { id: 25, sku: "6240000021", category: "audio", title: "Sears Silvertone Stereo Console", price: "$12,499", dimensions: "38\" W x 14\" D x 29.5\" H", shortDesc: "Sears Silvertone vintage stereo console. Well-built with attractive classic mid-century design at an accessible price point.", fullDesc: "Sears Silvertone vintage stereo console. Part of Sears’ popular house brand audio line, offering solid mid-century design at a more accessible price point.\n\nThese Silvertone consoles are known for being well-built and attractive. The design is classic mid-century with good presence.", keywords: "sears silvertone, vintage stereo console, mid century console, retro console, wood console, vintage audio" },
+
+            // Tables
+            { id: 26, sku: "521100005", category: "tables", title: "Kidney Shape Glass Top Coffee Table", price: "$1,499", dimensions: "49\" W x 28\" H x 15\" D", shortDesc: "Organic kidney-shaped mid-century coffee table with glass top. Keeps the look light and works well with curved seating.", fullDesc: "Kidney-shaped coffee table with glass top. Features the organic, sculptural form popular in mid-century design, with a clear glass surface that keeps the look light.\n\nThe kidney shape adds visual interest and works well with curved or organic seating arrangements. Glass top helps the piece feel less heavy.", keywords: "kidney shape coffee table, glass top coffee table, mid century coffee table, mcm coffee table, vintage coffee table" },
+            
+            { id: 27, sku: "62205", category: "tables", title: "Pair of Postmodern Black Side Tables", price: "$299", dimensions: "21\" W x 21\" D x 15.5\" H each", shortDesc: "Bold graphic postmodern black side tables. Strong geometric presence typical of the postmodern movement.", fullDesc: "Pair of postmodern black side tables. Bold, graphic design with strong geometric presence — typical of the postmodern movement’s playful take on form.\n\nThe black finish gives them a strong, modern graphic quality. These work well as a pair or individually.", keywords: "postmodern side tables, black side tables, pair of side tables, vintage side tables, modern side tables" },
+            
+            { id: 28, sku: "52400005", category: "tables", title: "Laminate Top Coffee Table", price: "$249", dimensions: "47.5\" W x 17.5\" D x 15\" H", shortDesc: "Practical mid-century coffee table with durable laminate top. Simple honest design that resists wear.", fullDesc: "Mid-century coffee table with laminate top. Practical surface that resists wear while maintaining clean mid-century lines.\n\nThe laminate top is durable and easy to care for. Simple, honest design that fits well with many mid-century settings.", keywords: "laminate coffee table, mid century coffee table, vintage coffee table, wood coffee table, laminate top table" },
+            
+            { id: 29, sku: "2222225", category: "tables", title: "Adrian Pearsall Jacks Coffee Table", price: "$2,400", dimensions: "59\" W x 20\" D x 15.5\" H", shortDesc: "Sculptural Adrian Pearsall 'Jacks' coffee table. Dynamic, playful structure with strong visual interest.", fullDesc: "Adrian Pearsall \"Jacks\" coffee table. Pearsall was known for his sculptural, distinctive designs, and this piece showcases his creative approach to form.\n\nThe \"Jacks\" design has a dynamic, almost playful structure while remaining functional. A recognizable Pearsall piece with strong visual interest.", keywords: "adrian pearsall, jacks coffee table, mid century coffee table, mcm coffee table, vintage coffee table, designer coffee table" },
+            
+            { id: 30, sku: "521100052", category: "tables", title: "Pair of Lane Side Tables", price: "$549", dimensions: "28\" W x 25\" D x 20\" H each", shortDesc: "Another versatile pair of Lane mid-century side tables. Same reliable construction and timeless styling.", fullDesc: "Another pair of Lane side tables with slightly different proportions. Still carrying Lane’s signature mid-century quality and clean design.\n\nSlightly different dimensions from the other Lane pair, offering more placement options. Same reliable Lane construction and timeless styling.", keywords: "lane side tables, pair of side tables, mid century end tables, mcm side tables, vintage side tables" },
+            
+            { id: 31, sku: "3200052", category: "tables", title: "Pair of Kroehler Walnut/Rosewood End Tables", price: "$1,699", dimensions: "25\" W x 24\" D x 21\" H each", shortDesc: "Handsome pair of Kroehler end tables combining walnut and rosewood. Rich, warm appearance with solid construction.", fullDesc: "Pair of Kroehler end tables featuring walnut and rosewood. Combines two beautiful woods for a rich, warm appearance.\n\nThe mix of walnut and rosewood gives these tables depth and character. Solid construction from a respected maker.", keywords: "kroehler end tables, walnut rosewood tables, pair of end tables, mid century end tables, mcm side tables" },
+            
+            { id: 32, sku: "624000002", category: "tables", title: "Pair of Lane Side Tables", price: "$799", dimensions: "29.5\" W x 20\" D x 19.5\" H each", shortDesc: "Another pair of Lane side tables with slightly different proportions. Reliable Lane quality.", fullDesc: "Another pair of Lane side tables with slightly different proportions. Still carrying Lane’s signature mid-century quality and clean design.\n\nSlightly different dimensions from the other Lane pair, offering more placement options.", keywords: "lane side tables, pair of side tables, mid century end tables, mcm side tables, vintage side tables, lane furniture" },
+            
+            { id: 33, sku: "62400002", category: "tables", title: "Lane Surfboard Coffee Table", price: "$799", dimensions: "59.5\" W x 18\" D x 14\" H", shortDesc: "Classic Lane 'Surfboard' coffee table. Elongated organic shape that became a mid-century icon.", fullDesc: "Lane \"Surfboard\" coffee table. Features the signature elongated, organic shape that became a mid-century icon.\n\nThe surfboard shape is both functional and sculptural. Lane’s version is well-executed with good proportions.", keywords: "lane surfboard coffee table, mid century coffee table, mcm coffee table, vintage coffee table, surfboard table" },
+
+            // Sofas & Seating
+            { id: 34, sku: "6240000041", category: "seating", title: "Adrian Pearsall 1223S Sofa", price: "$5,999", dimensions: "94\" W x 30\" D x 33\" H", shortDesc: "Generous Adrian Pearsall sofa with strong visual presence. Both beautiful and comfortable.", fullDesc: "Adrian Pearsall 1223S sofa. Pearsall’s designs are prized for their sculptural quality and comfortable proportions. This model showcases his distinctive style.\n\nGenerous seating with strong visual presence. Pearsall sofas are known for being both beautiful and comfortable.", keywords: "adrian pearsall sofa, mid century sofa, mcm sofa, vintage sofa, designer sofa, wood frame sofa" },
+            
+            { id: 35, sku: "623000578", category: "seating", title: "Vintage 1950s 2pc Sectional Sofa", price: "$3,999", dimensions: "106\" W x 31.5\" D x 30.5\" H", shortDesc: "Flexible two-piece sectional from the 1950s. Generous seating in classic mid-century proportions.", fullDesc: "Two-piece sectional sofa from the 1950s. Offers flexible configuration and generous seating in classic mid-century proportions.\n\nThe two-piece design allows for different arrangements. Substantial seating for larger spaces.", keywords: "1950s sectional sofa, vintage sectional, mid century sectional, mcm sectional sofa, vintage sofa, two piece sectional" },
+            
+            { id: 36, sku: "6230000021", category: "seating", title: "Roche Bobois French Leather Sofa", price: "$2,999", dimensions: "87\" W x 32\" D x 35\" H", shortDesc: "Refined European Roche Bobois leather sofa. Sophisticated vintage leather with French mid-century sensibility.", fullDesc: "Roche Bobois French leather sofa. Features the refined European design and quality leather upholstery Roche Bobois is known for.\n\nFrench mid-century/modern sensibility with beautiful leather. Comfortable and well-proportioned.", keywords: "roche bobois sofa, french leather sofa, vintage leather sofa, mid century sofa, designer sofa, leather couch" },
+            
+            { id: 37, sku: "624000523", category: "seating", title: "MCM Loveseat", price: "$3,299", dimensions: "59\" W x 32\" D x 30\" H", shortDesc: "Compact yet comfortable mid-century modern loveseat. Clean lines and classic proportions — perfect scale for smaller spaces.", fullDesc: "Mid-century modern loveseat. Compact yet comfortable two-seater with clean lines and classic proportions.\n\nPerfect scale for smaller living rooms, apartments, or as a complement to larger seating. Honest mid-century design.", keywords: "mcm loveseat, mid century loveseat, vintage loveseat, mid century sofa, wood frame loveseat" },
+            
+            { id: 38, sku: "624000002", category: "seating", title: "Antique Settee", price: "$2,199", dimensions: "48\" W x 32\" D x 31.5\" H", shortDesc: "Smaller-scale antique settee with traditional framing. Works well in traditional, eclectic, or transitional spaces.", fullDesc: "Antique settee with traditional framing and upholstery. Offers a more formal, classic alternative to mid-century seating.\n\nSmaller scale than a full sofa but with presence. Works well in traditional, eclectic, or transitional spaces.", keywords: "antique settee, vintage settee, wood frame settee, vintage sofa, antique furniture, living room settee" },
+            
+            { id: 39, sku: "6240000001", category: "seating", title: "Post Modern Full Grain Sofa", price: "$3,299", dimensions: "94\" W x 29\" D x 32\" H", shortDesc: "Bold postmodern full grain leather sofa. Assertive modern edge with quality leather that will develop beautiful patina.", fullDesc: "Postmodern full grain leather sofa. Features the bold, graphic sensibility of the postmodern period with quality leather upholstery.\n\nSubstantial seating with a more assertive, modern edge than classic mid-century. Full grain leather will develop beautiful patina.", keywords: "post modern sofa, full grain leather sofa, vintage sofa, modern sofa, leather couch, postmodern furniture" },
+
+            // More Seating
+            { id: 40, sku: "524000008", category: "seating", title: "Peter Hvidt High-Back Lounge Chair (Black)", price: "$4,999", dimensions: "27.5\" W x 26\" D x 45\" H", shortDesc: "Elegant Peter Hvidt high-back lounge chair in black. Excellent support and sophisticated Danish modern presence.", fullDesc: "Peter Hvidt high-back lounge chair in black. Hvidt was a master of Danish modern design, known for elegant, comfortable, and beautifully crafted furniture.\n\nThe high back provides excellent support and presence. Classic Danish modern proportions and craftsmanship.", keywords: "peter hvidt chair, high back lounge chair, danish modern chair, mid century chair, teak chair, vintage lounge chair" },
+            
+            { id: 41, sku: "524000008", category: "seating", title: "Peter Hvidt High-Back Lounge Chair (White)", price: "$4,999", dimensions: "27.5\" W x 26\" D x 45\" H", shortDesc: "Same elegant Peter Hvidt high-back design in white. Lighter visual presence while maintaining excellent comfort.", fullDesc: "Peter Hvidt high-back lounge chair in white. Same elegant Danish modern design as the black version, offering a lighter visual presence.\n\nThe white upholstery brightens the piece and works well in lighter interiors. Same excellent comfort and proportions.", keywords: "peter hvidt chair, high back lounge chair, danish modern chair, mid century chair, teak chair, vintage lounge chair" },
+            
+            { id: 42, sku: "62200008", category: "seating", title: "Adrian Pearsall for Craft Associates Recliner", price: "$3,499", dimensions: "Dimensions available upon request", shortDesc: "Rare Pearsall recliner for Craft Associates. Sculptural design with the added function of reclining.", fullDesc: "Adrian Pearsall for Craft Associates recliner. Combines Pearsall’s distinctive design sensibility with the practical function of a reclining chair.\n\nRare to find Pearsall designs with reclining function. Retains his sculptural quality while adding everyday comfort.", keywords: "adrian pearsall recliner, craft associates recliner, mid century recliner, mcm recliner, vintage recliner, designer recliner" },
+            
+            { id: 43, sku: "421100577", category: "seating", title: "Fiberglass Space Age Lounge Chair (White)", price: "$1,799", dimensions: "35.5\" W x 25.5\" D x 44.5\" H", shortDesc: "Iconic molded fiberglass space age lounge chair in white. Striking sculptural form from the atomic era.", fullDesc: "Fiberglass space age lounge chair in white. Iconic mid-century modern form using molded fiberglass — a material celebrated in the space age era.\n\nThe sculptural fiberglass shell is both striking and comfortable. White color keeps the look light and modern.", keywords: "fiberglass lounge chair, space age chair, mid century modern chair, vintage fiberglass chair, mcm chair" },
+            
+            { id: 44, sku: "421100577", category: "seating", title: "Fiberglass Space Age Lounge Chair (Orange)", price: "$1,799", dimensions: "35.5\" W x 25.5\" D x 44.5\" H", shortDesc: "Vibrant orange version of the iconic fiberglass space age lounge chair. Bold energetic color statement.", fullDesc: "Fiberglass space age lounge chair in vibrant orange. Same iconic molded form as the white version but with bold, energetic color.\n\nThe orange hue makes a strong statement. Perfect for mid-century, atomic, or eclectic interiors.", keywords: "fiberglass lounge chair, space age chair, mid century modern chair, vintage fiberglass chair, mcm chair, orange chair" },
+            
+            { id: 45, sku: "2222224", category: "other", title: "Artisans Guild Flower Footstool", price: "$349", dimensions: "20\" W x 20\" D x 17\" H", shortDesc: "Charming sculptural flower-inspired footstool. Whimsical and cheerful accent piece.", fullDesc: "Artisans Guild flower footstool. Features a charming, sculptural form inspired by floral motifs — a delightful accent piece.\n\nThe flower-inspired design adds whimsy and character. Works beautifully as a footstool, small seat, or decorative accent.", keywords: "flower footstool, artisans guild, vintage footstool, mid century footstool, wood footstool, accent footstool" },
+            
+            { id: 46, sku: "624000008", category: "seating", title: "Pair Edward Wormley for Dunbar Model 1308 Wingback Chair", price: "$11,999", dimensions: "27.5\" W x 33.5\" D x 42\" H each", shortDesc: "Highly desirable pair of Edward Wormley for Dunbar wingback chairs. Refined modern interpretation of the classic form.", fullDesc: "Pair of Edward Wormley for Dunbar Model 1308 wingback chairs. Wormley’s interpretation of the wingback form is more modern and refined than traditional versions.\n\nThese are among the most desirable Wormley designs. The pair offers symmetry and presence.", keywords: "edward wormley, dunbar wingback chair, pair of wingback chairs, mid century wingback, vintage wingback, designer chair" },
+            
+            { id: 47, sku: "6240000001", category: "seating", title: "Pair of Kroehler Lounge Chairs", price: "$1,899", dimensions: "29.5\" W x 31\" D x 33\" H each", shortDesc: "Solid mid-century Kroehler lounge chair pair. Reliable build quality and classic styling from a well-known American maker.", fullDesc: "Pair of Kroehler lounge chairs. Solid mid-century construction with comfortable proportions from a well-known American furniture maker.\n\nReliable build quality and classic mid-century styling. The pair works well for symmetrical arrangements or as individual accent chairs.", keywords: "kroehler lounge chairs, pair of lounge chairs, mid century lounge chairs, mcm lounge chairs, vintage lounge chairs" },
+            
+            { id: 48, sku: "624000007", category: "seating", title: "Adrian Pearsall 2291-C Lounge Chair", price: "$3,499", dimensions: "27.5\" W x 29.5\" D x 28.5\" H", shortDesc: "Another strong example of Pearsall’s sculptural, comfortable lounge chair designs.", fullDesc: "Adrian Pearsall 2291-C lounge chair. Another example of Pearsall’s sculptural, comfortable designs that blend art and function.\n\nDistinctive Pearsall form with excellent proportions. Comfortable for lounging while making a visual statement.", keywords: "adrian pearsall chair, 2291-c lounge chair, mid century lounge chair, mcm lounge chair, vintage lounge chair, designer chair" },
+            
+            { id: 49, sku: "624000005", category: "seating", title: "Vintage Leather Black Lounge Chair (set of 3)", price: "$999", dimensions: "29\" W x 30\" D x 34\" H each", shortDesc: "Set of three substantial vintage black leather lounge chairs. Rich leather with character that will develop beautiful patina.", fullDesc: "Set of three vintage black leather lounge chairs. Substantial, comfortable seating with rich leather that will develop beautiful patina over time.\n\nLeather is in vintage condition with character. The set of three offers flexibility for larger seating arrangements.", keywords: "vintage leather lounge chair, black leather chair, mid century leather chair, mcm lounge chair, vintage leather chair" },
+            
+            { id: 50, sku: "624000003", category: "seating", title: "Vintage Pink Armchairs (Pair)", price: "$699", dimensions: "28.5\" W x 25.5\" D x 28.5\" H each", shortDesc: "Cheerful pair of vintage pink armchairs. Playful color pop with classic mid-century proportions.", fullDesc: "Pair of vintage pink armchairs. Cheerful color and classic mid-century proportions make these fun, feminine accent pieces.\n\nThe pink upholstery adds a playful pop of color. Comfortable scale for bedrooms, reading nooks, or living room accents.", keywords: "vintage pink armchairs, pink accent chairs, mid century armchairs, vintage armchairs, wood frame chairs" },
+            
+            { id: 51, sku: "528000005", category: "seating", title: "Adrian Pearsall by Craft Associates Lounge Chair", price: "$3,500", dimensions: "30\" W x 30\" D x 28\" H", shortDesc: "Strong example of Pearsall’s distinctive mid-century design language produced by Craft Associates.", fullDesc: "Adrian Pearsall lounge chair produced by Craft Associates. Another strong example of Pearsall’s distinctive mid-century design language.\n\nComfortable proportions with Pearsall’s signature sculptural quality. Craft Associates was known for high-quality execution of designer pieces.", keywords: "adrian pearsall chair, craft associates chair, mid century lounge chair, mcm lounge chair, vintage lounge chair, designer chair" },
+            
+            { id: 52, sku: "521100002", category: "seating", title: "Kroehler Chair and Ottoman", price: "$1,599", dimensions: "29\" W x 29\" D x 31\" H", shortDesc: "Kroehler chair with matching ottoman. Practical mid-century design with added lounging functionality.", fullDesc: "Kroehler chair with matching ottoman. Offers comfortable seating with the added functionality of a footrest — practical mid-century design.\n\nThe ottoman extends the usability of the chair for lounging. Clean lines and solid construction.", keywords: "kroehler chair and ottoman, mid century chair and ottoman, mcm lounge chair, vintage lounge chair, wood frame chair" },
+            
+            { id: 53, sku: "623000521", category: "other", title: "Pair of Iron Barstools", price: "$375", dimensions: "29\" H", shortDesc: "Industrial-modern iron barstools. Sturdy, low-maintenance with clean lines — great for kitchen islands or bars.", fullDesc: "Pair of iron barstools. Industrial-modern aesthetic with clean lines and durable construction.\n\nGreat for kitchen islands, bars, or casual seating. The iron construction is sturdy and low-maintenance.", keywords: "iron barstools, pair of barstools, vintage barstools, metal barstools, industrial barstools" },
+            
+            { id: 54, sku: "521100521", category: "seating", title: "Kroehler Slipper Chair", price: "$599", dimensions: "23.5\" W x 23\" D x 31\" H", shortDesc: "Compact Kroehler mid-century slipper chair. Armless design — versatile and space-efficient.", fullDesc: "Kroehler slipper chair. Compact, armless design typical of mid-century slipper chairs — versatile and space-efficient.\n\nSlipper chairs are excellent for bedrooms, dressing areas, or as extra seating. The compact scale makes them easy to place.", keywords: "kroehler slipper chair, mid century slipper chair, mcm slipper chair, vintage slipper chair, wood frame chair" },
+            
+            { id: 55, sku: "623000234", category: "other", title: "Kevi Swivel Office Chair", price: "$999", dimensions: "27.5\" W x 22\" D x 31\" D", shortDesc: "Danish-made Kevi swivel office chair. Thoughtful ergonomics and clean Scandinavian design.", fullDesc: "Kevi swivel office/desk chair. Danish-made with the thoughtful ergonomics and clean design Scandinavia is famous for.\n\nSwivel function and good adjustability. Classic Danish modern office chair aesthetic. Works well at desks or as a versatile accent chair.", keywords: "kevi swivel chair, office chair, vintage office chair, swivel desk chair, mid century office chair" },
+            
+            { id: 56, sku: "3221000521", category: "seating", title: "Danish Pod Chair (Purple)", price: "$1,699", dimensions: "26\" W x 30\" D x 27\" H", shortDesc: "Enveloping sculptural Danish pod chair in purple. Bold color and distinctive mid-century form.", fullDesc: "Danish pod chair in purple. Features the enveloping, sculptural form that became popular in mid-century modern design.\n\nThe pod form is both comfortable and visually striking. Purple upholstery adds bold color. A fun, distinctive vintage accent chair with Scandinavian roots.", keywords: "danish pod chair, purple pod chair, mid century pod chair, mcm pod chair, vintage pod chair, danish modern furniture" },
+            
+            { id: 57, sku: "624000007", category: "seating", title: "Adrian Pearsall 1239-C Lounge Chair", price: "$2,999", dimensions: "44\" W x 30\" D x 33\" H", shortDesc: "Larger-scale Adrian Pearsall lounge chair. Generous seating with his signature sculptural quality.", fullDesc: "Adrian Pearsall 1239-C lounge chair. Larger-scale Pearsall design offering generous seating with his signature sculptural quality.\n\nMore substantial than some of his smaller lounge chairs. Excellent proportions and comfort. A commanding yet refined vintage designer piece.", keywords: "adrian pearsall chair, 1239-c lounge chair, mid century lounge chair, mcm lounge chair, vintage lounge chair, designer chair" },
+            
+            { id: 58, sku: "6230000021", category: "other", title: "Robert Sonneman Chrome Floor Lamp", price: "$875", dimensions: "69.5\" H", shortDesc: "Sleek Robert Sonneman chrome floor lamp. Timeless modern design celebrated for quality and clean lines.", fullDesc: "Robert Sonneman chrome floor lamp. Sonneman is celebrated for his sleek, modern lighting designs that epitomize mid-century and contemporary aesthetics.\n\nClean chrome construction with elegant lines. Sonneman lamps are known for quality and timeless modern design.", keywords: "robert sonneman lamp, chrome floor lamp, mid century floor lamp, vintage floor lamp, modern floor lamp" },
+            
+            { id: 59, sku: "33000824", category: "other", title: "Bruce Gecchelin for Skipper Italy Mezzaluna Floor Lamp", price: "$999", dimensions: "70-84\" H (adjustable)", shortDesc: "Iconic adjustable arc Mezzaluna floor lamp by Bruce Gecchelin for Skipper Italy. Striking Italian mid-century lighting.", fullDesc: "Bruce Gecchelin for Skipper Italy Mezzaluna floor lamp. Features the iconic arc form and Italian design sensibility.\n\nThe adjustable arc design is both functional and sculptural. Italian mid-century lighting at its best.", keywords: "bruce gecchelin, mezzaluna floor lamp, skipper italy lamp, mid century floor lamp, vintage floor lamp, italian floor lamp" },
+            
+            { id: 60, sku: "624000008", category: "other", title: "Rya Shag Rug 8x10 ft", price: "$2,499", dimensions: "8 ft x 10 ft", shortDesc: "Vintage Rya shag rug. Deep pile, rich colors, and wonderful textural quality — a hallmark of Scandinavian design.", fullDesc: "Vintage Rya shag rug, 8x10 ft. Rya rugs are celebrated for their deep pile, rich colors, and textural quality — a hallmark of Scandinavian design.\n\nThe generous 8x10 size works well in living rooms or bedrooms. Deep shag pile offers wonderful texture underfoot.", keywords: "rya shag rug, vintage shag rug, mid century rug, large area rug, vintage rug, shag carpet, wool rug" },
+            
+            { id: 61, sku: "11111111", category: "audio", title: "1960s Hallicrafters Retro-fit Stereo", price: "$999", dimensions: "Dimensions available upon request", shortDesc: "1960s Hallicrafters stereo system retro-fitted for modern use. Combines vintage aesthetics with updated internals.", fullDesc: "1960s Hallicrafters stereo system, retro-fitted for modern use. Hallicrafters was known for quality electronics, and this piece has been updated for contemporary listening.\n\nCombines vintage Hallicrafters aesthetics with updated internals for reliable modern performance. A characterful piece of audio history that’s ready to use today.", keywords: "hallicrafters stereo, 1960s stereo, vintage stereo, retro stereo, vintage audio, mid century audio, retro fit stereo" }
+        ]
+
+        let currentFilter = 'all'
+        let currentSearch = ''
+
+        function getCategoryLabel(cat) {
+            const map = { dining: 'Dining', seating: 'Seating', audio: 'Audio', tables: 'Tables', storage: 'Storage', other: 'Other' }
+            return map[cat] || cat
+        }
+
+        function getCategoryColor(cat) {
+            const map = {
+                dining: 'bg-orange-100 text-orange-700',
+                seating: 'bg-sky-100 text-sky-700',
+                audio: 'bg-amber-100 text-amber-700',
+                tables: 'bg-emerald-100 text-emerald-700',
+                storage: 'bg-violet-100 text-violet-700',
+                other: 'bg-zinc-200 text-zinc-600'
+            }
+            return map[cat] || 'bg-zinc-100 text-zinc-600'
+        }
+
+        function createProductCard(product) {
+            const card = document.createElement('div')
+            card.className = `product-card bg-white border border-zinc-200 rounded-3xl overflow-hidden flex flex-col h-full cursor-pointer`
+            card.onclick = () => showModal(product)
+            
+            card.innerHTML = `
+                <div class="px-5 pt-5 pb-4 flex-1 flex flex-col">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <span class="sku-pill font-mono">${product.sku}</span>
+                        <span class="category-badge ${getCategoryColor(product.category)}">${getCategoryLabel(product.category)}</span>
+                    </div>
+                    
+                    <h3 class="font-semibold text-[15px] leading-tight tracking-[-0.01em] mb-2 line-clamp-3 pr-1">${product.title}</h3>
+                    
+                    <div class="text-xs text-zinc-500 mb-3 flex items-center gap-x-1.5">
+                        <i class="fa-solid fa-ruler-horizontal text-[10px]"></i>
+                        <span>${product.dimensions}</span>
+                    </div>
+                    
+                    <p class="text-sm text-zinc-600 line-clamp-3 flex-1">${product.shortDesc}</p>
+                    
+                    <div class="mt-auto pt-4 flex items-center justify-between">
+                        <span class="font-semibold text-lg tabular-nums tracking-tight">${product.price}</span>
+                        <span class="text-[#3f2a1e] text-xs font-medium flex items-center gap-x-1">View details <i class="fa-solid fa-arrow-right text-[10px]"></i></span>
+                    </div>
+                </div>
+            `
+            return card
+        }
+
+        function renderProducts(filtered) {
+            const grid = document.getElementById('productGrid')
+            const noResults = document.getElementById('noResults')
+            grid.innerHTML = ''
+            
+            if (filtered.length === 0) {
+                noResults.classList.remove('hidden')
+                grid.classList.add('hidden')
+            } else {
+                noResults.classList.add('hidden')
+                grid.classList.remove('hidden')
+                filtered.forEach(p => grid.appendChild(createProductCard(p)))
+            }
+            
+            document.getElementById('resultsCount').innerHTML = 
+                `Showing <span class="font-semibold">${filtered.length}</span> SKU items`
+        }
+
+        function filterProducts() {
+            let filtered = products
+            
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(p => p.category === currentFilter)
+            }
+            
+            if (currentSearch) {
+                const term = currentSearch.toLowerCase()
+                filtered = filtered.filter(p =>
+                    p.sku.toLowerCase().includes(term) ||
+                    p.title.toLowerCase().includes(term) ||
+                    p.shortDesc.toLowerCase().includes(term) ||
+                    p.fullDesc.toLowerCase().includes(term) ||
+                    (p.keywords && p.keywords.toLowerCase().includes(term))
+                )
+            }
+            
+            renderProducts(filtered)
+        }
+
+        function filterByCategory(category) {
+            currentFilter = category
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-[#3f2a1e]', 'text-white')
+                btn.classList.add('border', 'border-zinc-200', 'hover:bg-zinc-50')
+                if (btn.dataset.category === category || (category === 'all' && btn.dataset.category === 'all')) {
+                    btn.classList.add('active', 'bg-[#3f2a1e]', 'text-white')
+                    btn.classList.remove('border', 'border-zinc-200', 'hover:bg-zinc-50')
+                }
+            })
+            filterProducts()
+        }
+
+        function showModal(product) {
+            const modal = document.getElementById('detailModal')
+            
+            document.getElementById('modalSKU').textContent = product.sku
+            document.getElementById('modalTitle').textContent = product.title
+            document.getElementById('modalPrice').textContent = product.price
+            document.getElementById('modalDimensions').textContent = product.dimensions
+            document.getElementById('modalOverview').innerHTML = product.shortDesc
+            document.getElementById('modalDescription').innerHTML = product.fullDesc.replace(/\n/g, '<br>')
+            
+            const catEl = document.getElementById('modalCategory')
+            catEl.textContent = getCategoryLabel(product.category)
+            catEl.className = `category-badge ${getCategoryColor(product.category)}`
+            
+            const kwContainer = document.getElementById('modalKeywords')
+            kwContainer.innerHTML = ''
+            if (product.keywords) {
+                product.keywords.split(',').forEach(kw => {
+                    const tag = document.createElement('span')
+                    tag.className = 'px-3 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-2xl'
+                    tag.textContent = kw.trim()
+                    kwContainer.appendChild(tag)
+                })
+            }
+            
+            modal.classList.remove('hidden')
+            modal.classList.add('flex')
+            document.body.style.overflow = 'hidden'
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detailModal')
+            modal.classList.remove('flex')
+            modal.classList.add('hidden')
+            document.body.style.overflow = ''
+        }
+
+        function setupSearch() {
+            const input = document.getElementById('searchInput')
+            input.addEventListener('input', e => {
+                currentSearch = e.target.value.trim()
+                filterProducts()
+            })
+            
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('detailModal')
+                    if (modal.classList.contains('flex')) {
+                        closeModal()
+                    } else if (currentSearch) {
+                        input.value = ''
+                        currentSearch = ''
+                        filterProducts()
+                    }
+                }
+            })
+        }
+
+        function initialize() {
+            // Initial render
+            renderProducts(products)
+            
+            // Make sure "All" button is styled correctly
+            const allBtn = document.querySelector('.category-btn[data-category="all"]')
+            if (allBtn) allBtn.classList.add('active', 'bg-[#3f2a1e]', 'text-white')
+            
+            setupSearch()
+            
+            // Keyboard accessibility note
+            console.log('%c[Vintage Source KC] SKU-only inventory preview ready with compiled descriptions.', 'color:#666')
+        }
+
+        window.onload = initialize
+    </script>
+</body>
+</html>
